@@ -1,6 +1,6 @@
 # Revit Downgrader: Rebuild newer Revit models in Revit 2020, 2021 or 2022
 
-**A cross-version model reconstruction toolkit for Revit 2021–2027 to Revit 2020, 2021 or 2022. The new Downgrader.Import2021 target adds a separate importer for Revit 2021; the existing Revit 2020 importer remains available.** It exports model geometry, supported native element data, family definitions, and project documentation into a portable package, then rebuilds the package inside Revit 2020.
+**A cross-version model reconstruction toolkit for Revit 2021–2027 to Revit 2020, 2021 or 2022. Separate destination importers are provided for Revit 2020, 2021 and 2022.** It exports model geometry, supported native element data, family definitions, and project documentation into a portable package, then rebuilds the package inside the selected destination version.
 
 > **Important:** This is reconstruction, not Autodesk's native backward file conversion. Some content may be represented as DirectShape geometry or have documented losses. Always test on copies and review reports before relying on the result.
 
@@ -32,16 +32,16 @@
 | Family reconstruction | Rebuilds supported family parameters, formulas, types, reference planes, labelled dimensions, and extrusion geometry |
 | Documentation transfer | Supports configured views, schedules, sheets, annotations, groups, parameters, tags, revisions, project information, linked models, and worksets |
 | Verification and reports | Records element outcomes, reasons, category summaries, and geometry deviation checks |
-| Batch workflows | Exports multiple RVT files or imports multiple packages into new Revit 2020 projects |
+| Batch workflows | Exports multiple RVT files or imports multiple packages into new projects in the selected destination version |
 | Dry run | Runs model import and generates a report, then rolls back model changes |
 | Optional IFC | Can add an IFC2x3 export as an independent fallback or comparison |
 
 
-RVT files are forward-only, so this tool **rebuilds** a 2022 model in 2020 instead of converting the file.
+RVT files are forward-only, so this tool **rebuilds** a newer model in the selected destination version instead of converting the file.
 Two add-ins share one package format:
 
 ```
-Revit 2021..2027  --[Downgrader.Export<year>]-->  <Project>.downgrade/  --[Downgrader.Import2020]-->  Revit 2020
+Revit 2021..2027  --[Downgrader.Export<year>]-->  <Project>.downgrade/  --[Downgrader.ImportYYYY]-->  Revit 2020 / 2021 / 2022
 ```
 
 | Revit | Project | Framework | Build symbols | Notes |
@@ -54,12 +54,13 @@ Revit 2021..2027  --[Downgrader.Export<year>]-->  <Project>.downgrade/  --[Downg
 | 2026 | `Downgrader.Export2026` | net8.0-windows | + `REVIT2024_OR_NEWER` | .NET 8 (Autodesk plans to move the runtime to .NET 10; net8 add-ins are expected to keep loading) |
 | 2027 | `Downgrader.Export2027` | net10.0-windows | + `REVIT2024_OR_NEWER` | needs the .NET 10 SDK. **Not in `RevitDowngrader.sln`** (Visual Studio 2022 reports NETSDK1209): open `RevitDowngrader.Revit2027.sln` in Visual Studio 2026, or run `build-export2027.cmd` (dotnet CLI) |
 | 2020 | `Downgrader.Import2020` | net47 | none | importer for Revit 2020 |
-| 2021 | `Downgrader.Import2021` | net48 | none | importer target for Revit 2021; uses the shared package format |\n| 2022 | `Downgrader.Import2022` | net48 | `REVIT2022_OR_NEWER` API family | importer target for Revit 2022; uses Revit 2022 API references and the shared package format |
+| 2021 | `Downgrader.Import2021` | net48 | none | importer target for Revit 2021; uses the shared package format |
+| 2022 | `Downgrader.Import2022` | net48 | `REVIT2022_OR_NEWER` API family | importer target for Revit 2022; uses Revit 2022 API references and the shared package format |
 All exporters compile the **same source** (Export2024 and Export2025 link the Export2022 files and define `REVIT2024_OR_NEWER`);
 the handful of API differences live in `Shared/Compat.cs`. Packages from either exporter are identical in format
 (2025 data is normalised to the Revit 2020 vocabulary at export time), so one 2020 importer reads them all.
 
-Export add-ins appear on the **BIM TOOLS** ribbon tab. Importers are target-specific: install Downgrader.Import2020 in Revit 2020 or Downgrader.Import2021 in Revit 2021. For many files use Batch Export, then the matching target's Batch Import.
+Export add-ins appear on the **BIM TOOLS** ribbon tab. Importers are target-specific: install the importer matching the destination: Downgrader.Import2020, Downgrader.Import2021, or Downgrader.Import2022. For many files use Batch Export, then the matching target's Batch Import.
 
 ## Build (Visual Studio 2022)
 1. Open `RevitDowngrader.sln`. **RevitAPI / RevitAPIUI are restored from NuGet** (`Nice3point.Revit.Api.*`, matching year), so no Revit install is needed to compile; use `/p:UseLocalRevitApi=true` to reference the DLLs of an installed Revit instead. Revit API paths (only used for that) default to `C:\Program Files\Autodesk\Revit 2025` / `2022` / `2020`
@@ -82,7 +83,8 @@ Choose the exporter based on the **version that opens your source model** and th
 | `Downgrader.Export2023` | Source-version exporter | The source model is opened in version 2023 |
 | `Downgrader.Export2022` | Source-version exporter | The source model is opened in version 2022 |
 | `Downgrader.Export2021` | Source-version exporter | The source model is opened in version 2021 |
-| `Downgrader.Import2022` | Destination-version importer | You want to rebuild a package in version 2022 |\n| `Downgrader.Import2021` | Destination-version importer | You want to rebuild a package in version 2021 |
+| `Downgrader.Import2022` | Destination-version importer | You want to rebuild a package in version 2022 |
+| `Downgrader.Import2021` | Destination-version importer | You want to rebuild a package in version 2021 |
 | `Downgrader.Import2020` | Destination-version importer | You want to rebuild a package in version 2020 |
 | `Downgrader.Core` | Shared package, schema, options and reporting logic | Shared conversion behavior or package structure needs work |
 | `Shared` | Shared ribbon, UI and compatibility helpers | Common add-in UI or compatibility behavior needs work |
@@ -108,10 +110,10 @@ The exporters and importers exchange a package; this is a reconstruction workflo
 5. Choose Model package, Docs package, or both. For a typical migration, select both.
 6. Review category and level filters, then the Mode & fidelity, Documentation, Advanced, and Output tabs.
 7. Choose the output folder and package name, export, and inspect the report.
-8. Open Revit 2020 and create a new project from the appropriate template.
+8. Open the chosen destination version (Revit 2020, 2021 or 2022) and create a new project from the appropriate template.
 9. On BIM TOOLS > Downgrade (import), choose Import and select the .downgrade package.
 10. Import Model first, then Docs. Import Both runs the stages in order.
-11. Review the report and validate geometry, parameters, hosts, views, schedules, sheets, and links in Revit 2020.
+11. Review the report and validate geometry, parameters, hosts, views, schedules, sheets, and links in the chosen destination version.
 
 **Recommended first test:** use a small representative model and a test template before processing a large or contractual project.
 
@@ -132,7 +134,7 @@ The Include sub-folders option controls recursive discovery. Detach central file
 2. Select the folder containing .downgrade packages, a project template (.rte), and an output folder.
 3. Confirm and monitor progress.
 
-Each package is imported into a new project and saved with the _2022.rvt suffix. A batch-import-log.txt file is written to the output folder. Check it for failures.
+Each package is imported into a new project and saved with a suffix identifying the destination version (for example, `_2022.rvt` for the 2022 importer). A batch-import-log.txt file is written to the output folder. Check it for failures.
 
 ## Workflow
 1. **Revit 2021 - 2027**, open the project: `Model Package` then `Docs Package` -> choose a folder; a `<name>.downgrade` folder is created.
@@ -235,7 +237,7 @@ Options are stored in downgrade.options.json inside each package. Defaults for n
 
 ## Import interface and options
 
-On BIM TOOLS > Downgrade (import) in Revit 2020:
+On BIM TOOLS > Downgrade (import) in Revit 2020, 2021 or 2022:
 
 - **Import:** opens the import studio, offers recent packages, displays package contents, and lets you choose model and/or documentation import.
 - **Import Model:** imports model data only.
@@ -299,7 +301,7 @@ Test in this order: Core -> Export on a small model -> Import on a blank 2020 pr
 
 1. Clone the repository and open RevitDowngrader.sln for the supported solution targets.
 2. Restore NuGet packages.
-3. Build Downgrader.Core, then build the exporter for the source Revit year and Downgrader.Import2020.
+3. Build Downgrader.Core, then build the exporter for the source Revit year and the importer for the chosen destination year.
 4. Revit 2027 is in RevitDowngrader.Revit2027.sln because its .NET 10 target may not be supported by the Visual Studio 2022 SDK setup. Use a .NET 10 SDK with build-export2027.cmd or a compatible Visual Studio version.
 5. Confirm build outputs and .addin manifest assembly paths point to the intended files.
 6. Deploy only the add-in matching the Revit version being tested and verify the BIM TOOLS ribbon panel appears.
@@ -355,16 +357,16 @@ Model improvements in the same release: **native roofs** (footprint, slope lines
 for wall, floor and roof types, verification of every native element against the source bounding box with automatic DirectShape fallback.
 
 
-## New target: downgrade Revit 2027–2021 models into Revit 2021
+## Destination targets: rebuild Revit 2027–2021 models in Revit 2021 or 2022
 
-The `feature/revit-2021-target` branch adds `Downgrader.Import2021`, a separate importer project targeting **Revit 2021 / .NET Framework 4.8**. It is intended to reuse the existing `.downgrade` package format produced by the Revit 2021–2027 exporters, while preserving the original Revit 2020 importer.
+The `feature/revit-2021-target` branch now contains separate importer projects for Revit 2021 and Revit 2022, each targeting **.NET Framework 4.8** and using the shared `.downgrade` package format produced by the Revit 2021–2027 exporters. The original Revit 2020 importer remains available.
 
-### Revit 2021 workflow
+### Revit 2021 / 2022 workflow
 
 1. Build and install the exporter matching the source model's Revit version (2021–2027).
 2. Export the model package and, if needed, the documentation package.
 3. Open Revit 2021 and create a new project from a suitable template.
-4. Build/install `Downgrader.Import2021` and confirm its BIM TOOLS > Downgrade (import) panel appears.
+4. Build/install `Downgrader.Import2021` or `Downgrader.Import2022`, matching the destination version, and confirm its BIM TOOLS > Downgrade (import) panel appears.
 5. Use Import or Batch Import, then review the generated reports and validate the rebuilt model.
 
 ### Build the Revit 2021 importer
@@ -375,4 +377,12 @@ The `feature/revit-2021-target` branch adds `Downgrader.Import2021`, a separate 
 - Add-in deployment folder: `%AppData%\Autodesk\Revit\Addins\2021`
 - The project references the shared `Downgrader.Core` and `Shared` source.
 
-**Validation status:** this new target has been added to source control but has not been compiled or runtime-tested in Revit 2021. Treat it as experimental until the importer builds against the Revit 2021 API and passes model, family, documentation, and batch-import tests. Keep the original source model and review reports before using any output for delivery.
+### Build the Revit 2022 importer
+
+- Project: `Downgrader.Import2022/Downgrader.Import2022.csproj`
+- Target framework: `net48`
+- API packages: `Nice3point.Revit.Api.RevitAPI` and `Nice3point.Revit.Api.RevitAPIUI`, version `2022.*`
+- Add-in deployment folder: `%AppData%\\Autodesk\\Revit\\Addins\\2022`
+- The project references the shared `Downgrader.Core` and `Shared` source.
+
+**Validation status:** the Revit 2021 and 2022 importer targets have been added to source control but have not been compiled or runtime-tested. Treat them as experimental until each builds against its intended Revit API and passes model, family, documentation, and batch-import tests. Keep the original source model and review reports before using any output for delivery.
