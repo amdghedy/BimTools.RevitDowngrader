@@ -7,6 +7,7 @@
 ## Contents
 
 - Capabilities at a glance
+- Folder structure: find the tool for each version
 - Supported Revit versions
 - Quick start: one model
 - Batch processing
@@ -67,6 +68,36 @@ Export add-ins appear on the **BIM TOOLS** ribbon tab. Importers are target-spec
    Build only the exporters for the Revit versions you use (any of 2021 - 2027). In Visual Studio unload the projects you do not need, or build one with `dotnet build Downgrader.Export2026\\Downgrader.Export2026.csproj -c Release`. `Downgrader.Core` multi-targets net47 (2020 / 2022) and net8.0 (2025).
 3. Core uses the framework's own JSON (System.Web.Extensions on net47, System.Text.Json on net8), so there is no Newtonsoft clash with Revit.
 4. Core multi-targets net47 (used by the net48 exporters and the 2020 importer) and net8.0 (used by the 2025 / 2026 / 2027 exporters; a net10 add-in can reference net8).
+
+## Folder structure: find the tool for each version
+
+Choose the exporter based on the **version that opens your source model** and the importer based on the **version where you want to rebuild it**.
+
+| Folder / project | Role | Use it when |
+|---|---|---|
+| `Downgrader.Export2027` | Source-version exporter | The source model is opened in version 2027 |
+| `Downgrader.Export2026` | Source-version exporter | The source model is opened in version 2026 |
+| `Downgrader.Export2025` | Source-version exporter | The source model is opened in version 2025 |
+| `Downgrader.Export2024` | Source-version exporter | The source model is opened in version 2024 |
+| `Downgrader.Export2023` | Source-version exporter | The source model is opened in version 2023 |
+| `Downgrader.Export2022` | Source-version exporter | The source model is opened in version 2022 |
+| `Downgrader.Export2021` | Source-version exporter | The source model is opened in version 2021 |
+| `Downgrader.Import2021` | Destination-version importer | You want to rebuild a package in version 2021 |
+| `Downgrader.Import2020` | Destination-version importer | You want to rebuild a package in version 2020 |
+| `Downgrader.Core` | Shared package, schema, options and reporting logic | Shared conversion behavior or package structure needs work |
+| `Shared` | Shared ribbon, UI and compatibility helpers | Common add-in UI or compatibility behavior needs work |
+| `RevitDowngrader.sln` | Main solution | Building the supported projects in the main solution |
+| `RevitDowngrader.Revit2027.sln` | Separate 2027 solution | Building the 2027 exporter with a compatible .NET 10 SDK/toolchain |
+| `docs/VERSION_FOLDER_GUIDE.md` | Detailed folder and workflow guide | You need the complete version map and workflow |
+
+### How to choose the right projects
+
+1. **Source:** open the model in its original version and run the matching `Downgrader.ExportYYYY` add-in.
+2. **Package:** export the model/documentation package and retain the report.
+3. **Destination:** install `Downgrader.Import2021` for a 2021 destination or `Downgrader.Import2020` for a 2020 destination.
+4. **Validate:** import into a new project and review the report, geometry, families, parameters, coordinates, links and documentation.
+
+The exporters and importers exchange a package; this is a reconstruction workflow, not a direct rewrite of the original model file. A listed project is not proof that every version combination has compiled or passed runtime testing. Check the validation status in this README and test on copies before production use.
 
 ## Quick start: one model
 
