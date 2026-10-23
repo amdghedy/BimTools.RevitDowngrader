@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup Condition="Exists('$(MSBuildThisFileDirectory)..\ThirdParty\RevitAPI\2021\RevitAPI.dll') And '$(UseLocalRevitApi)' == ''">
+    <RevitDir>$(MSBuildThisFileDirectory)..\ThirdParty\RevitAPI\2021</RevitDir>
+    <UseLocalRevitApi>true</UseLocalRevitApi>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>Downgrader.Import2021</AssemblyName>
+    <RootNamespace>Downgrader.Import</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\</OutputPath>
+    <RevitDir Condition="'$(RevitDir)' == ''">C:\Program Files\Autodesk\Revit 2021</RevitDir>
+    <AddinsDir>$(APPDATA)\Autodesk\Revit\Addins\2021</AddinsDir>
+    <UseLocalRevitApi Condition="'$(UseLocalRevitApi)' == ''">false</UseLocalRevitApi>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(UseLocalRevitApi)' != 'true'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2021.*" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2021.*" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalRevitApi)' == 'true'">
+    <Reference Include="RevitAPI"><HintPath>$(RevitDir)\RevitAPI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="RevitAPIUI"><HintPath>$(RevitDir)\RevitAPIUI.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <ProjectReference Include="..\Downgrader.Core\Downgrader.Core.csproj" />
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+    <None Include="Downgrader.Import2021.addin" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+  <Target Name="DeployAddin" AfterTargets="Build">
+    <MakeDir Directories="$(AddinsDir);$(AddinsDir)\Downgrader" />
+    <Copy SourceFiles="Downgrader.Import2021.addin" DestinationFolder="$(AddinsDir)" />
+    <Copy SourceFiles="$(OutDir)Downgrader.Import2021.dll;$(OutDir)Downgrader.Core.dll" DestinationFolder="$(AddinsDir)\Downgrader" />
+  </Target>
+</Project>
