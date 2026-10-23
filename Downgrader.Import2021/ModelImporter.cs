@@ -44,7 +44,7 @@ namespace Downgrader.Import
             _res = new Resolver(_doc, _map);
 
             // 1. families are rebuilt in their own documents first (no project transaction open)
-            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2021.txt")))
+            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2020.txt")))
             {
                 var fb = new FamilyBuilder(_app, _p, _o, _r, shared);
                 if (_o.RebuildFamilies && _o.Mode == ExportMode.Hybrid) fb.BuildAll(_m.Families);
@@ -276,7 +276,7 @@ namespace Downgrader.Import
         {
             if (_failedFamilies.Count == 0) return;
             var redo = new List<FamilyRec>();
-            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2021.txt")))
+            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2020.txt")))
             {
                 var fb = new FamilyBuilder(_app, _p, _o, _r, shared);
                 int n = 0;

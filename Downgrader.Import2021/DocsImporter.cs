@@ -97,7 +97,7 @@ namespace Downgrader.Import
             it.Reset();
             while (it.MoveNext()) have.Add(it.Key.Name);
 
-            using (var shared = new SharedParamHelper(_app, System.IO.Path.Combine(_p.Root, "shared_params_2021.txt")))
+            using (var shared = new SharedParamHelper(_app, System.IO.Path.Combine(_p.Root, "shared_params_2020.txt")))
             {
                 foreach (ProjParamRec pp in _d.ProjectParams)
                 {
