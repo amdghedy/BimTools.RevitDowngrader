@@ -6,7 +6,7 @@ This guide explains where to find each version-specific conversion tool and whic
 
 | Your source model version | Export project to use | Destination importer | Notes |
 |---|---|---|---|
-| 2027 | `Downgrader.Export2027` | `Downgrader.Import2021` or `Downgrader.Import2020` | The 2027 exporter is built separately with the .NET 10 SDK. Validate the importer/API combination before use. |
+| 2027 | `Downgrader.Export2027` | `Downgrader.Import2022`, `Downgrader.Import2021` or `Downgrader.Import2020` | The 2027 exporter is built separately with the .NET 10 SDK. Validate the importer/API combination before use. |
 | 2026 | `Downgrader.Export2026` | `Downgrader.Import2021` or `Downgrader.Import2020` | Use the exporter that matches the version opening the source model. |
 | 2025 | `Downgrader.Export2025` | `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
 | 2024 | `Downgrader.Export2024` | `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
@@ -34,7 +34,7 @@ BimTools.RevitDowngrader/
 ├── Downgrader.Export2026/           # Exporter loaded by the 2026 source application
 ├── Downgrader.Export2027/           # Exporter loaded by the 2027 source application
 ├── Downgrader.Import2020/           # Importer loaded in the 2020 destination application
-├── Downgrader.Import2021/           # Importer loaded in the 2021 destination application
+├── Downgrader.Import2022/           # Importer loaded in the 2022 destination application\n├── Downgrader.Import2021/           # Importer loaded in the 2021 destination application
 ├── RevitDowngrader.sln              # Main solution for supported non-2027 targets
 ├── RevitDowngrader.Revit2027.sln    # Separate solution for the 2027/.NET 10 exporter
 ├── Get-RevitApi.ps1                 # Optional helper for downloading API assemblies
