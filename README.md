@@ -386,3 +386,24 @@ The `feature/revit-2021-target` branch now contains separate importer projects f
 - The project references the shared `Downgrader.Core` and `Shared` source.
 
 **Validation status:** the Revit 2021 and 2022 importer targets have been added to source control but have not been compiled or runtime-tested. Treat them as experimental until each builds against its intended Revit API and passes model, family, documentation, and batch-import tests. Keep the original source model and review reports before using any output for delivery.
+
+
+## Unified master solution and installer
+
+The repository now includes a master solution and a per-user installer workflow for the version-specific add-ins.
+
+- **Master solution:** [`RevitDowngrader.AllVersions.sln`](RevitDowngrader.AllVersions.sln) lists the core library, importers for Revit 2020–2022, and exporters for Revit 2021–2027.
+- **Installer definition:** [`installer/RevitDowngrader.iss`](installer/RevitDowngrader.iss) builds a per-user Windows installer using Inno Setup; administrator rights are not required.
+- **Payload builder:** [`installer/build-installer-payload.ps1`](installer/build-installer-payload.ps1) builds each version-specific project and stages its add-in manifest and assemblies.
+- **Online build:** [Build all Revit versions and installer workflow](.github/workflows/build-all-versions-installer.yml) builds the projects, compiles the installer, and uploads an artifact in GitHub Actions.
+
+### Build and download
+
+1. Open the **Actions** tab and run **Build all Revit versions and installer**.
+2. Wait for the workflow to finish successfully.
+3. Download the `BIMTOOLS-RevitDowngrader-AllVersions` artifact from that workflow run. The artifact includes the setup executable and staged payload.
+4. Run the installer as your Windows user, then restart Revit.
+
+The master solution includes the Revit 2027 exporter, which requires the .NET 10 SDK. Visual Studio 2022 may not support that project; use a compatible newer Visual Studio or build the version-specific project with the .NET CLI. The installer workflow is the intended one-click packaging path.
+
+**Validation note:** The installer and workflow definitions have been added to the repository, but a successful CI run and in-Revit runtime validation are still required before treating the installer as production-verified. This tool reconstructs models and does not provide native backward RVT file conversion.
