@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>BIM TOOLS Downgrade Export 2027</Name>
+    <Assembly>Downgrader\Downgrader.Export2027.dll</Assembly>
+    <AddInId>b60e5687-ec0b-4d99-a347-7a18f1b67f99</AddInId>
+    <FullClassName>Downgrader.Export.App</FullClassName>
+    <VendorId>BIMTOOLS</VendorId>
+    <VendorDescription>BIM TOOLS</VendorDescription>
+  </AddIn>
+</RevitAddIns>

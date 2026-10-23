@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Offline / vendored RevitAPI: if Get-RevitApi.ps1 has downloaded ThirdParty\RevitAPI\2020\RevitAPI.dll, use it instead of the NuGet packages -->
+  <PropertyGroup Condition="Exists('$(MSBuildThisFileDirectory)..\ThirdParty\RevitAPI\2020\RevitAPI.dll') And '$(UseLocalRevitApi)' == ''">
+    <RevitDir>$(MSBuildThisFileDirectory)..\ThirdParty\RevitAPI\2020</RevitDir>
+    <UseLocalRevitApi>true</UseLocalRevitApi>
+  </PropertyGroup>
+  <!-- Revit 2020 add-in (.NET Framework 4.7). Override the install path with:  msbuild /p:RevitDir="D:\Autodesk\Revit 2020" -->
+  <PropertyGroup>
+    <TargetFramework>net47</TargetFramework>
+    <AssemblyName>Downgrader.Import2020</AssemblyName>
+    <RootNamespace>Downgrader.Import</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\</OutputPath>
+    <RevitDir Condition="'$(RevitDir)' == ''">C:\Program Files\Autodesk\Revit 2020</RevitDir>
+    <AddinsDir>$(APPDATA)\Autodesk\Revit\Addins\2020</AddinsDir>
+    <!-- false (default): RevitAPI / RevitAPIUI come from NuGet, no Revit install needed to build.  true: use the DLLs in RevitDir. -->
+    <UseLocalRevitApi Condition="'$(UseLocalRevitApi)' == ''">false</UseLocalRevitApi>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(UseLocalRevitApi)' != 'true'">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2020.*" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2020.*" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalRevitApi)' == 'true'">
+    <Reference Include="RevitAPI"><HintPath>$(RevitDir)\RevitAPI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="RevitAPIUI"><HintPath>$(RevitDir)\RevitAPIUI.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <ProjectReference Include="..\Downgrader.Core\Downgrader.Core.csproj" />
+    <Compile Include="..\Shared\*.cs" Link="Shared\%(Filename)%(Extension)" />
+    <None Include="Downgrader.Import2020.addin" CopyToOutputDirectory="Never" />
+  </ItemGroup>
+  <Target Name="DeployAddin" AfterTargets="Build">
+    <Copy SourceFiles="Downgrader.Import2020.addin" DestinationFolder="$(AddinsDir)" />
+    <Copy SourceFiles="$(OutDir)Downgrader.Import2020.dll;$(OutDir)Downgrader.Core.dll" DestinationFolder="$(AddinsDir)\Downgrader" />
+  </Target>
+</Project>

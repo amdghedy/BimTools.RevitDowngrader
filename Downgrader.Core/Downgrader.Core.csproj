@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Version-neutral schema + IO. No Revit references.
+       net47  -> used by the Revit 2020 importer and the Revit 2022 exporter
+       net8.0 -> used by the Revit 2025 exporter -->
+  <PropertyGroup>
+    <TargetFrameworks>net47;net8.0</TargetFrameworks>
+    <AssemblyName>Downgrader.Core</AssemblyName>
+    <RootNamespace>Downgrader.Core</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <Reference Include="System.Web.Extensions" />
+  </ItemGroup>
+</Project>
