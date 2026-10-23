@@ -1,6 +1,6 @@
-# Revit Downgrader: Rebuild newer Revit models in Revit 2020 or 2021
+# Revit Downgrader: Rebuild newer Revit models in Revit 2020, 2021 or 2022
 
-**A cross-version model reconstruction toolkit for Revit 2021–2027 to Revit 2020 or 2021. The new Downgrader.Import2021 target adds a separate importer for Revit 2021; the existing Revit 2020 importer remains available.** It exports model geometry, supported native element data, family definitions, and project documentation into a portable package, then rebuilds the package inside Revit 2020.
+**A cross-version model reconstruction toolkit for Revit 2021–2027 to Revit 2020, 2021 or 2022. The new Downgrader.Import2021 target adds a separate importer for Revit 2021; the existing Revit 2020 importer remains available.** It exports model geometry, supported native element data, family definitions, and project documentation into a portable package, then rebuilds the package inside Revit 2020.
 
 > **Important:** This is reconstruction, not Autodesk's native backward file conversion. Some content may be represented as DirectShape geometry or have documented losses. Always test on copies and review reports before relying on the result.
 
@@ -24,7 +24,7 @@
 
 | Capability | What it does |
 |---|---|
-| Export from Revit 2021–2027 | Writes model and documentation packages for the Revit 2020 or 2021 importer |
+| Export from Revit 2021–2027 | Writes model and documentation packages for the Revit 2020, 2021 or 2022 importer |
 | Hybrid reconstruction | Attempts supported native elements, verifies results, and uses DirectShape fallback when needed |
 | Geometry-only mode | Prioritizes robust visual geometry over native editability |
 | Scope controls | Export the whole project, current selection, or elements visible in the active view |
@@ -54,7 +54,7 @@ Revit 2021..2027  --[Downgrader.Export<year>]-->  <Project>.downgrade/  --[Downg
 | 2026 | `Downgrader.Export2026` | net8.0-windows | + `REVIT2024_OR_NEWER` | .NET 8 (Autodesk plans to move the runtime to .NET 10; net8 add-ins are expected to keep loading) |
 | 2027 | `Downgrader.Export2027` | net10.0-windows | + `REVIT2024_OR_NEWER` | needs the .NET 10 SDK. **Not in `RevitDowngrader.sln`** (Visual Studio 2022 reports NETSDK1209): open `RevitDowngrader.Revit2027.sln` in Visual Studio 2026, or run `build-export2027.cmd` (dotnet CLI) |
 | 2020 | `Downgrader.Import2020` | net47 | none | importer for Revit 2020 |
-| 2021 | `Downgrader.Import2021` | net48 | none | new importer target for Revit 2021; uses the shared package format |
+| 2021 | `Downgrader.Import2021` | net48 | none | importer target for Revit 2021; uses the shared package format |\n| 2022 | `Downgrader.Import2022` | net48 | `REVIT2022_OR_NEWER` API family | importer target for Revit 2022; uses Revit 2022 API references and the shared package format |
 All exporters compile the **same source** (Export2024 and Export2025 link the Export2022 files and define `REVIT2024_OR_NEWER`);
 the handful of API differences live in `Shared/Compat.cs`. Packages from either exporter are identical in format
 (2025 data is normalised to the Revit 2020 vocabulary at export time), so one 2020 importer reads them all.
@@ -64,7 +64,7 @@ Export add-ins appear on the **BIM TOOLS** ribbon tab. Importers are target-spec
 ## Build (Visual Studio 2022)
 1. Open `RevitDowngrader.sln`. **RevitAPI / RevitAPIUI are restored from NuGet** (`Nice3point.Revit.Api.*`, matching year), so no Revit install is needed to compile; use `/p:UseLocalRevitApi=true` to reference the DLLs of an installed Revit instead. Revit API paths (only used for that) default to `C:\Program Files\Autodesk\Revit 2025` / `2022` / `2020`
    (override with `/p:RevitDir=...`). Each add-in project copies its DLLs + `.addin` into `%AppData%\Autodesk\Revit\Addins\<year>`.
-2. Build the exporter for your source Revit version and the importer matching your destination (Downgrader.Import2020 or Downgrader.Import2021). Revit 2021 importer targets .NET Framework 4.8 and uses Revit 2021 API packages.
+2. Build the exporter for your source Revit version and the importer matching your destination (Downgrader.Import2020, Downgrader.Import2021 or Downgrader.Import2022). Revit 2021 importer targets .NET Framework 4.8 and uses Revit 2021 API packages.
    Build only the exporters for the Revit versions you use (any of 2021 - 2027). In Visual Studio unload the projects you do not need, or build one with `dotnet build Downgrader.Export2026\\Downgrader.Export2026.csproj -c Release`. `Downgrader.Core` multi-targets net47 (2020 / 2022) and net8.0 (2025).
 3. Core uses the framework's own JSON (System.Web.Extensions on net47, System.Text.Json on net8), so there is no Newtonsoft clash with Revit.
 4. Core multi-targets net47 (used by the net48 exporters and the 2020 importer) and net8.0 (used by the 2025 / 2026 / 2027 exporters; a net10 add-in can reference net8).
@@ -82,7 +82,7 @@ Choose the exporter based on the **version that opens your source model** and th
 | `Downgrader.Export2023` | Source-version exporter | The source model is opened in version 2023 |
 | `Downgrader.Export2022` | Source-version exporter | The source model is opened in version 2022 |
 | `Downgrader.Export2021` | Source-version exporter | The source model is opened in version 2021 |
-| `Downgrader.Import2021` | Destination-version importer | You want to rebuild a package in version 2021 |
+| `Downgrader.Import2022` | Destination-version importer | You want to rebuild a package in version 2022 |\n| `Downgrader.Import2021` | Destination-version importer | You want to rebuild a package in version 2021 |
 | `Downgrader.Import2020` | Destination-version importer | You want to rebuild a package in version 2020 |
 | `Downgrader.Core` | Shared package, schema, options and reporting logic | Shared conversion behavior or package structure needs work |
 | `Shared` | Shared ribbon, UI and compatibility helpers | Common add-in UI or compatibility behavior needs work |
@@ -94,7 +94,7 @@ Choose the exporter based on the **version that opens your source model** and th
 
 1. **Source:** open the model in its original version and run the matching `Downgrader.ExportYYYY` add-in.
 2. **Package:** export the model/documentation package and retain the report.
-3. **Destination:** install `Downgrader.Import2021` for a 2021 destination or `Downgrader.Import2020` for a 2020 destination.
+3. **Destination:** install `Downgrader.Import2022` for a 2022 destination, `Downgrader.Import2021` for a 2021 destination, or `Downgrader.Import2020` for a 2020 destination.
 4. **Validate:** import into a new project and review the report, geometry, families, parameters, coordinates, links and documentation.
 
 The exporters and importers exchange a package; this is a reconstruction workflow, not a direct rewrite of the original model file. A listed project is not proof that every version combination has compiled or passed runtime testing. Check the validation status in this README and test on copies before production use.
@@ -128,16 +128,16 @@ The Include sub-folders option controls recursive discovery. Detach central file
 
 ### Batch Import
 
-1. In Revit 2020, choose Batch Import.
+1. In the destination version (Revit 2020, 2021 or 2022), choose Batch Import.
 2. Select the folder containing .downgrade packages, a project template (.rte), and an output folder.
 3. Confirm and monitor progress.
 
-Each package is imported into a new project and saved with the _2020.rvt suffix. A batch-import-log.txt file is written to the output folder. Check it for failures.
+Each package is imported into a new project and saved with the _2022.rvt suffix. A batch-import-log.txt file is written to the output folder. Check it for failures.
 
 ## Workflow
 1. **Revit 2021 - 2027**, open the project: `Model Package` then `Docs Package` -> choose a folder; a `<name>.downgrade` folder is created.
 2. Optional: edit `downgrade.options.json` in the package (mesh detail, verification tolerances, family template folder, ...).
-3. **Revit 2020**, open a new project from your template: `Import Model (1st)` then `Import Docs (2nd)`; pick the package folder.
+3. **Revit 2020 / 2021 / 2022**, open a new project from your template: `Import Model (1st)` then `Import Docs (2nd)`; pick the package folder.
 4. Read `report/import-model.txt` and `report/import-docs.txt`: every item is tagged Native / NativeWithLoss / DirectShape / Skipped with the reason.
 
 Package layout: `model/model.json` + `model/geometry.pack` + `model/families/*.family.json` (package A);
@@ -158,11 +158,11 @@ point-based families (level-based, hosted doors/windows, two-level columns), **r
 sloped/shape-edited floors, edited-profile walls, in-place families ...) arrives as verified-geometry DirectShapes.
 
 ## Buttons
-| Revit 2022 (export) | Revit 2020 (import) |
+| Revit 2022 (export) | Revit 2022 (import) |
 |---|---|
 | **Export Both** - model + docs in one step | **Import Both** - model, then docs |
 | Model Package / Docs Package | Import Model / Import Docs |
-| **Batch Export** - every .rvt in a folder, opened detached, no manual work | **Batch Import** - every *.downgrade package -> new project from a template -> saved `<name>_2020.rvt` |
+| **Batch Export** - every .rvt in a folder, opened detached, no manual work | **Batch Import** - every *.downgrade package -> new project from a template -> saved `<name>_2022.rvt` |
 | **Options** - defaults for new packages | **Package Info** - what a package contains and what to expect, nothing touched |
 | | **Options** - edit the options stored in one package |
 
