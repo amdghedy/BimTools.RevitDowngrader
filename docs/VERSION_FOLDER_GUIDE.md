@@ -11,7 +11,7 @@ This guide explains where to find each version-specific conversion tool and whic
 | 2025 | `Downgrader.Export2025` | `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
 | 2024 | `Downgrader.Export2024` | `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
 | 2023 | `Downgrader.Export2023` | `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
-| 2022 | `Downgrader.Export2022` | `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
+| 2022 | `Downgrader.Export2022` | `Downgrader.Import2022`, `Downgrader.Import2021` or `Downgrader.Import2020` | Review export report and rebuilt output. |
 | 2021 | `Downgrader.Export2021` | `Downgrader.Import2021` or `Downgrader.Import2020` | For a same-version export/import path, verify whether conversion is needed first. |
 | Package already exported | No exporter needed | `Downgrader.Import2021` or `Downgrader.Import2020` | Choose the importer that matches the Revit version in which you want to rebuild the model. |
 
@@ -34,7 +34,8 @@ BimTools.RevitDowngrader/
 ├── Downgrader.Export2026/           # Exporter loaded by the 2026 source application
 ├── Downgrader.Export2027/           # Exporter loaded by the 2027 source application
 ├── Downgrader.Import2020/           # Importer loaded in the 2020 destination application
-├── Downgrader.Import2022/           # Importer loaded in the 2022 destination application\n├── Downgrader.Import2021/           # Importer loaded in the 2021 destination application
+├── Downgrader.Import2022/           # Importer loaded in the 2022 destination application
+├── Downgrader.Import2021/           # Importer loaded in the 2021 destination application
 ├── RevitDowngrader.sln              # Main solution for supported non-2027 targets
 ├── RevitDowngrader.Revit2027.sln    # Separate solution for the 2027/.NET 10 exporter
 ├── Get-RevitApi.ps1                 # Optional helper for downloading API assemblies
