@@ -1,4 +1,40 @@
-# Revit Downgrader (2022 -> 2020)
+# Revit Downgrader: Rebuild newer Revit models in Revit 2020
+
+**A cross-version model reconstruction toolkit for Revit 2021–2027 to Revit 2020.** It exports model geometry, supported native element data, family definitions, and project documentation into a portable package, then rebuilds the package inside Revit 2020.
+
+> **Important:** This is reconstruction, not Autodesk's native backward file conversion. Some content may be represented as DirectShape geometry or have documented losses. Always test on copies and review reports before relying on the result.
+
+## Contents
+
+- Capabilities at a glance
+- Supported Revit versions
+- Quick start: one model
+- Batch processing
+- Export interface and options
+- Import interface and options
+- What gets rebuilt
+- Package contents and reports
+- Install and build
+- Troubleshooting and safe use
+- Known limitations
+- Development status
+
+## Capabilities at a glance
+
+| Capability | What it does |
+|---|---|
+| Export from Revit 2021–2027 | Writes model and documentation packages for the Revit 2020 importer |
+| Hybrid reconstruction | Attempts supported native elements, verifies results, and uses DirectShape fallback when needed |
+| Geometry-only mode | Prioritizes robust visual geometry over native editability |
+| Scope controls | Export the whole project, current selection, or elements visible in the active view |
+| Category and level filters | Include or exclude categories and optionally restrict to named levels |
+| Family reconstruction | Rebuilds supported family parameters, formulas, types, reference planes, labelled dimensions, and extrusion geometry |
+| Documentation transfer | Supports configured views, schedules, sheets, annotations, groups, parameters, tags, revisions, project information, linked models, and worksets |
+| Verification and reports | Records element outcomes, reasons, category summaries, and geometry deviation checks |
+| Batch workflows | Exports multiple RVT files or imports multiple packages into new Revit 2020 projects |
+| Dry run | Runs model import and generates a report, then rolls back model changes |
+| Optional IFC | Can add an IFC2x3 export as an independent fallback or comparison |
+
 
 RVT files are forward-only, so this tool **rebuilds** a 2022 model in 2020 instead of converting the file.
 Two add-ins share one package format:
@@ -30,6 +66,41 @@ Both add-ins appear on the **BIM TOOLS** ribbon tab (panels "Downgrade (export)"
    Build only the exporters for the Revit versions you use (any of 2021 - 2027). In Visual Studio unload the projects you do not need, or build one with `dotnet build Downgrader.Export2026\\Downgrader.Export2026.csproj -c Release`. `Downgrader.Core` multi-targets net47 (2020 / 2022) and net8.0 (2025).
 3. Core uses the framework's own JSON (System.Web.Extensions on net47, System.Text.Json on net8), so there is no Newtonsoft clash with Revit.
 4. Core multi-targets net47 (used by the net48 exporters and the 2020 importer) and net8.0 (used by the 2025 / 2026 / 2027 exporters; a net10 add-in can reference net8).
+
+## Quick start: one model
+
+1. Make a backup and work from a copy of the source RVT.
+2. Open the project in its matching Revit version, 2021 through 2027.
+3. On the BIM TOOLS tab, open Downgrade (export) and choose Export.
+4. Choose the scope: whole project, selected elements, or elements visible in the active view.
+5. Choose Model package, Docs package, or both. For a typical migration, select both.
+6. Review category and level filters, then the Mode & fidelity, Documentation, Advanced, and Output tabs.
+7. Choose the output folder and package name, export, and inspect the report.
+8. Open Revit 2020 and create a new project from the appropriate template.
+9. On BIM TOOLS > Downgrade (import), choose Import and select the .downgrade package.
+10. Import Model first, then Docs. Import Both runs the stages in order.
+11. Review the report and validate geometry, parameters, hosts, views, schedules, sheets, and links in Revit 2020.
+
+**Recommended first test:** use a small representative model and a test template before processing a large or contractual project.
+
+## Batch processing
+
+### Batch Export
+
+1. In the source Revit version, choose BIM TOOLS > Downgrade (export) > Batch Export.
+2. Select the folder containing source RVT files and a separate output folder for packages.
+3. Confirm the file count and monitor progress. The operation can be cancelled.
+4. Review the batch log and each package report.
+
+The Include sub-folders option controls recursive discovery. Detach central files opens workshared models detached while preserving worksets, helping avoid changes to central models. Revit backup files with year-style suffixes are excluded.
+
+### Batch Import
+
+1. In Revit 2020, choose Batch Import.
+2. Select the folder containing .downgrade packages, a project template (.rte), and an output folder.
+3. Confirm and monitor progress.
+
+Each package is imported into a new project and saved with the _2020.rvt suffix. A batch-import-log.txt file is written to the output folder. Check it for failures.
 
 ## Workflow
 1. **Revit 2021 - 2027**, open the project: `Model Package` then `Docs Package` -> choose a folder; a `<name>.downgrade` folder is created.
@@ -79,10 +150,102 @@ sloped/shape-edited floors, edited-profile walls, in-place families ...) arrives
 - Documentation extras: tags (re-attached to the re-created elements), revisions and their sheet assignments, project information.
 - Reports are written as `.txt`, `.csv` (open in Excel, filter by tier), `-by-category.csv` (native / loss / DirectShape / skipped per category) and `.json`.
 
+## Export interface and options
+
+The Export studio groups settings into tabs. Options shown can vary by version and project context.
+
+### What to export
+
+- **Scope:** Whole project, selected elements, or elements visible in the active view. Selection scope is unavailable when nothing is selected.
+- **Model package:** model element identity, geometry, supported model data, and family data.
+- **Docs package:** supported documentation and project organization content.
+- **Categories:** scan the model, then include all categories, only checked categories, or all except checked categories.
+- **Levels:** include all levels or restrict processing to selected level names. Elements without a level are retained.
+- **Save these settings as my defaults:** saves current settings for future exports.
+
+### Mode, fidelity, and native rebuild
+
+- **Hybrid:** attempts native reconstruction where supported and verified; falls back to DirectShape when native reconstruction is unsupported, fails, or deviates beyond tolerance.
+- **GeometryOnly:** prioritizes robust geometry by representing model elements as DirectShapes, with less parametric editability.
+- **Fast / Balanced / Max fidelity presets:** provide starting points for common trade-offs. Review settings after applying a preset.
+- **Mesh detail:** ranges from coarse to fine; higher values can improve curved surfaces but increase package size.
+- **Verify native results:** compares rebuilt native element bounds with the source.
+- **Warn deviation (ft):** deviations above this value can be reported as NativeWithLoss.
+- **Fallback deviation (ft):** deviations above this value can trigger DirectShape fallback.
+- **Also export IFC:** optionally adds an IFC2x3 file where supported.
+- **Rebuild families:** rebuild supported loadable families as Revit 2020 families.
+- **Allow partial families:** permits use of partially rebuilt families when some geometry was not reconstructed.
+- **Freeze families that do not match:** can preserve measured per-type geometry when full parametric reconstruction is not possible; this is not equivalent to a fully editable parametric family.
+- **Store family type geometry / Verify rebuilt family types:** store source geometry and compare rebuilt type bounds.
+- **Family type tolerance (ft):** maximum accepted bounds difference for family verification.
+- **Native rooms:** attempts to recreate rooms; enclosing room-bounding geometry must be suitable.
+- **Native beams:** attempts to recreate supported straight structural framing.
+- **Native MEP curves:** attempts native straight pipes, ducts, conduits, and cable trays. Fittings and accessories are not covered by this switch.
+- **Native roofs:** option for native footprint roof reconstruction; validate results carefully.
+- **Family template folder:** optional folder containing Revit 2020 .rft templates. Empty uses Revit's default template path.
+
+### Documentation options
+
+The following switches control supported documentation content: Project parameters, Views, Schedules, Sheets, Annotations (text notes, detail lines, filled regions), Groups, Linked models, Tags, Revisions, Project information, Rebuild view templates, and Preserve worksets.
+
+**Link search folder** points to the folder containing downgraded linked files. Links are matched by name; batch import uses its output folder as a fallback. Validate link placement and coordinates after import.
+
+### Advanced and import-side options
+
+- **Include categories / Exclude categories:** filters which categories are processed. An empty include list means all categories unless exclusions apply.
+- **Only these levels:** restricts processing to named levels; an empty list means all levels.
+- **Force DirectShape categories:** always imports specified categories as DirectShapes, even if native rebuilding may be possible.
+- **Dry run (import):** performs model import for assessment, writes reports, then rolls back model changes. If model and docs are selected together, docs are skipped during dry run because no model elements remain for documentation to attach to.
+- **Show report when done:** opens the report window after a run.
+- **Include sub-folders / Detach central files:** batch export controls described above.
+
+Options are stored in downgrade.options.json inside each package. Defaults for new packages are stored at %AppData%\\BIMTOOLS\\Downgrader\\defaults.json. Package-specific options travel with the package.
+
+## Import interface and options
+
+On BIM TOOLS > Downgrade (import) in Revit 2020:
+
+- **Import:** opens the import studio, offers recent packages, displays package contents, and lets you choose model and/or documentation import.
+- **Import Model:** imports model data only.
+- **Import Docs:** imports documentation only. Import model first where documentation needs recreated elements.
+- **Import Both:** imports model, then documentation.
+- **Batch Import:** creates a new project from a selected template for each package and saves the result.
+- **Package Info:** summarizes package contents and mode/dry-run/verification settings without importing.
+- **Options:** edits settings stored in the selected package, including filters, forced DirectShape categories, dry run, and link search folder.
+- **Last Report:** reopens the most recent report.
+
+Model import is grouped into a single Revit Undo step. Cancelling model import rolls it back; cancelling documentation import may leave partial documentation changes, so inspect the project and report after cancellation.
+
+## Troubleshooting and safe use
+
+| Symptom | Checks |
+|---|---|
+| Downgrade panel does not appear | Confirm the matching year add-in is in that year's Addins folder, the manifest assembly path exists, and the correct Revit version is running. Check %AppData%\\BIMTOOLS\\Downgrader\\ribbon-error.txt if present. |
+| Export or import fails | Read the error dialog and the package report folder. Preserve the package and error report for diagnosis. |
+| Geometry appears but is not editable | The item may be a DirectShape. Check its tier and reason in the report. |
+| Family is incomplete or non-parametric | Review family options and report entries. Unsupported sweeps, blends, revolves, nested families, and imported geometry may not rebuild parametrically. |
+| Views or schedules differ | Validate view ranges, crop, visibility, schedule fields, filters, sorting, sheet viewports, and schedule instances manually. |
+| Linked models are missing | Set Link search folder to the location of the corresponding downgraded linked files. Links are matched by name. |
+| Build fails for a target year | Check the target framework and SDK, restore matching API packages, and review version-specific API errors. Every target is not yet verified. |
+| Batch output is incomplete | Review the batch log and each package report, then rerun failed files individually. |
+
+### Before using a rebuilt model for delivery
+
+- Keep untouched copies of all source RVT files.
+- Use a dedicated output folder and avoid overwriting valuable files.
+- Compare representative views and model areas against the source.
+- Validate geometry, levels, coordinates, hosts, constraints, family parameters, schedules, sheets, tags, phases, worksets, and links relevant to your project.
+- Review skipped and loss-marked items and resolve them with the design team.
+- Do not treat successful import as proof of design, coordination, quantity, or contractual equivalence.
+
 ## Known gaps / next milestones
 Nested families, sweeps/blends/revolves in families, symbolic lines and masking regions in families, wall joins, roofs and ceilings as
 native elements (roofs, ceilings), dimensions, keynotes, revision clouds, view filters, section boxes in 3D views, shared-coordinate alignment, legends
 (not creatable by the API), design options and phases (not creatable by the 2020 API).
+
+## Development status and validation
+
+**The existing project notes state that the code has not yet been compiled.** Treat the repository as experimental until you build it successfully against the intended Revit APIs and run export/import tests. The target matrix is not proof that every version has passed compilation or runtime testing.
 
 ## Important: this code has not been compiled yet
 It was written without the Revit SDK available. Expect a handful of compile fixes on first build (API member names that differ by version
@@ -91,6 +254,26 @@ are the usual suspects: e.g. `ScheduleDefinition.ShowGridLines`, `FamilyType.AsE
 Newer calls to check first: `IndependentTag.TaggedLocalElementId` / `HasLeader` (tags), `View.CreateViewTemplate`, `Revision` members, `IFCExportOptions`.
 Test in this order: Core -> Export on a small model -> Import on a blank 2020 project -> inspect `report/*.txt` -> then a real project.
 
+
+## Install and build
+
+### Prerequisites
+
+- Windows and Visual Studio with the workload for the target framework/runtime, or the matching .NET SDK and dotnet CLI.
+- Revit API reference assemblies for the target year. Projects default to the Nice3point Revit API NuGet packages; a local Revit installation can be selected instead.
+- The target Revit version for runtime testing. Compiling against API packages does not prove the add-in works correctly in Revit.
+
+### Build workflow
+
+1. Clone the repository and open RevitDowngrader.sln for the supported solution targets.
+2. Restore NuGet packages.
+3. Build Downgrader.Core, then build the exporter for the source Revit year and Downgrader.Import2020.
+4. Revit 2027 is in RevitDowngrader.Revit2027.sln because its .NET 10 target may not be supported by the Visual Studio 2022 SDK setup. Use a .NET 10 SDK with build-export2027.cmd or a compatible Visual Studio version.
+5. Confirm build outputs and .addin manifest assembly paths point to the intended files.
+6. Deploy only the add-in matching the Revit version being tested and verify the BIM TOOLS ribbon panel appears.
+7. Run a small export/import test and inspect all reports before wider use.
+
+Depending on project settings, builds may copy assemblies and .addin files to %AppData%\\Autodesk\\Revit\\Addins\\<year>. Review deployment settings before building on a production machine.
 
 ## RevitAPI.dll / RevitAPIUI.dll from NuGet
 - **Default:** every project has `PackageReference`s to `Nice3point.Revit.Api.RevitAPI` and `...RevitAPIUI` for its Revit year
