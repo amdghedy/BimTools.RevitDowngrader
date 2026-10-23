@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RevitAddIns>
   <AddIn Type="Application">
-    <Name>BIM TOOLS Downgrade Import</Name>
-    <Assembly>Downgrader\Downgrader.Import2020.dll</Assembly>
-    <AddInId>fc0a8802-ac2b-41cd-bc46-a17485b9917b</AddInId>
+    <Name>BIM TOOLS Downgrade Import 2021</Name>
+    <Assembly>Downgrader\Downgrader.Import2021.dll</Assembly>
+    <AddInId>71a61e84-6c7f-4bd4-8bb0-7d77a2212021</AddInId>
     <FullClassName>Downgrader.Import.App</FullClassName>
     <VendorId>BIMTOOLS</VendorId>
     <VendorDescription>BIM TOOLS</VendorDescription>

@@ -11,7 +11,7 @@ using Downgrader.RevitShared;
 
 namespace Downgrader.Import
 {
-    /// <summary>Package A -> 2020 project. Policy per element: try a native rebuild, verify it against the source bounding box,
+    /// <summary>Package A -> 2021 project. Policy per element: try a native rebuild, verify it against the source bounding box,
     /// and fall back to a DirectShape (same category, same geometry, same materials) when it cannot be rebuilt or does not match.</summary>
     public class ModelImporter
     {
@@ -44,7 +44,7 @@ namespace Downgrader.Import
             _res = new Resolver(_doc, _map);
 
             // 1. families are rebuilt in their own documents first (no project transaction open)
-            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2020.txt")))
+            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2021.txt")))
             {
                 var fb = new FamilyBuilder(_app, _p, _o, _r, shared);
                 if (_o.RebuildFamilies && _o.Mode == ExportMode.Hybrid) fb.BuildAll(_m.Families);
@@ -276,7 +276,7 @@ namespace Downgrader.Import
         {
             if (_failedFamilies.Count == 0) return;
             var redo = new List<FamilyRec>();
-            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2020.txt")))
+            using (var shared = new SharedParamHelper(_app, Path.Combine(_p.Root, "shared_params_2021.txt")))
             {
                 var fb = new FamilyBuilder(_app, _p, _o, _r, shared);
                 int n = 0;
@@ -492,7 +492,7 @@ namespace Downgrader.Import
         {
             why = null;
             FamilySymbol sym;
-            if (!_symbols.TryGetValue((rec.FamilyName ?? "") + "|" + (rec.TypeName ?? ""), out sym)) { why = "No matching family type in 2020 (family not rebuilt or type missing)"; return null; }
+            if (!_symbols.TryGetValue((rec.FamilyName ?? "") + "|" + (rec.TypeName ?? ""), out sym)) { why = "No matching family type in 2021 (family not rebuilt or type missing)"; return null; }
             FamilyRec fr = _m.Families.FirstOrDefault(f => f.Name == rec.FamilyName);
             if (fr != null && _built.ContainsKey(rec.FamilyName) && fr.Fidelity != "Full" && !_o.AllowPartialFamilies && !_frozen.Contains(rec.FamilyName))
             { why = "Family only partially rebuilt (" + string.Join(", ", fr.Dropped) + ")"; return null; }
@@ -597,7 +597,7 @@ namespace Downgrader.Import
         {
             why = null;
             FamilySymbol sym;
-            if (!_symbols.TryGetValue((rec.FamilyName ?? "") + "|" + (rec.TypeName ?? ""), out sym)) { why = "No matching beam type in 2020 (family not rebuilt or type missing)"; return null; }
+            if (!_symbols.TryGetValue((rec.FamilyName ?? "") + "|" + (rec.TypeName ?? ""), out sym)) { why = "No matching beam type in 2021 (family not rebuilt or type missing)"; return null; }
             FamilyRec fr = _m.Families.FirstOrDefault(f => f.Name == rec.FamilyName);
             if (fr != null && _built.ContainsKey(rec.FamilyName) && fr.Fidelity != "Full" && !_o.AllowPartialFamilies && !_frozen.Contains(rec.FamilyName))
             { why = "Beam family only partially rebuilt (" + string.Join(", ", fr.Dropped) + ")"; return null; }
@@ -620,7 +620,7 @@ namespace Downgrader.Import
             Autodesk.Revit.DB.Architecture.Room room = _doc.Create.NewRoom((Level)_doc.GetElement(lid), new UV(p.X, p.Y));
             if (room == null) { why = "Room could not be placed"; return null; }
             _doc.Regenerate();
-            if (room.Area < 1e-6) { why = "Room is not enclosed in 2020 (bounding walls missing or flattened)"; return null; }
+            if (room.Area < 1e-6) { why = "Room is not enclosed in 2021 (bounding walls missing or flattened)"; return null; }
             ParamConv.Apply(room, rec.Params, _res.Resolve);   // name, number, offsets, ...
             return room.Id;
         }

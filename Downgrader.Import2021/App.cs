@@ -5,7 +5,7 @@ using Downgrader.RevitShared;
 
 namespace Downgrader.Import
 {
-    /// <summary>Runs inside Revit 2020. Adds the import tools to the BIM TOOLS tab (created if it does not exist).</summary>
+    /// <summary>Runs inside Revit 2021. Adds the import tools to the BIM TOOLS tab (created if it does not exist).</summary>
     public class App : IExternalApplication
     {
         public Result OnStartup(UIControlledApplication app)
@@ -20,7 +20,7 @@ namespace Downgrader.Import
             { ToolTip = "Model then docs with the options stored in the package; only asks for the package folder" });
             BimToolsRibbon.AddSeparator(panel);
             BimToolsRibbon.AddButton(panel, new PushButtonData("DG_BatchImport", "Batch\nImport", asm, "Downgrader.Import.BatchImportCommand")
-            { ToolTip = "Turn every *.downgrade package in a folder into a saved Revit 2020 project, using a template" });
+            { ToolTip = "Turn every *.downgrade package in a folder into a saved Revit 2021 project, using a template" });
             BimToolsRibbon.AddButton(panel, new PushButtonData("DG_PackageInfo", "Package\nInfo", asm, "Downgrader.Import.PackageInfoCommand")
             { ToolTip = "What a package contains and what to expect, without touching the project" });
             BimToolsRibbon.AddButton(panel, new PushButtonData("DG_ImportOptions", "Options", asm, "Downgrader.Import.ImportOptionsCommand")

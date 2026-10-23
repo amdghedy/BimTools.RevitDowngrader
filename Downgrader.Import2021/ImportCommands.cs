@@ -195,7 +195,7 @@ namespace Downgrader.Import
             if (pkgRoot == null) return Result.Cancelled;
             string template = PackageFolder.PickFile("Revit project templates (*.rte)|*.rte", st.LastTemplate ?? app.DefaultProjectTemplate);
             if (template == null) return Result.Cancelled;
-            string outDir = PackageFolder.PickFolder("Output folder for the Revit 2020 projects (also used to find downgraded links)", st.LastOutputFolder);
+            string outDir = PackageFolder.PickFolder("Output folder for the Revit 2021 projects (also used to find downgraded links)", st.LastOutputFolder);
             if (outDir == null) return Result.Cancelled;
 
             List<string> packages = Directory.GetDirectories(pkgRoot, "*.downgrade", SearchOption.TopDirectoryOnly)
@@ -229,7 +229,7 @@ namespace Downgrader.Import
                         {
                             nd = app.NewProjectDocument(template);
                             ImportJob.Run(app, nd, pkg, true, true, outDir);
-                            nd.SaveAs(Path.Combine(outDir, RevitHelpers.SafeFileName(name) + "_2020.rvt"), new SaveAsOptions { OverwriteExistingFile = true });
+                            nd.SaveAs(Path.Combine(outDir, RevitHelpers.SafeFileName(name) + "_2021.rvt"), new SaveAsOptions { OverwriteExistingFile = true });
                             log.AppendLine("OK    " + pkg); ok++;
                         }
                         catch (OperationCanceledException) { throw; }

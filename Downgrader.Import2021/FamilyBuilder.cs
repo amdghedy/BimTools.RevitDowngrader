@@ -11,8 +11,8 @@ using Downgrader.RevitShared;
 
 namespace Downgrader.Import
 {
-    /// <summary>Rebuilds each extracted family as a real 2020 family (.rfa): parameters, formulas, types, reference planes,
-    /// labelled dimensions, extrusions locked to their planes. Result files land in rebuilt_rfa_2020/ and are loaded by the importer.</summary>
+    /// <summary>Rebuilds each extracted family as a real 2021 family (.rfa): parameters, formulas, types, reference planes,
+    /// labelled dimensions, extrusions locked to their planes. Result files land in rebuilt_rfa_2021/ and are loaded by the importer.</summary>
     public class FamilyBuilder
     {
         readonly Application _app;

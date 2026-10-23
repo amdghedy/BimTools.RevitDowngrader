@@ -10,7 +10,7 @@ using Downgrader.RevitShared;
 
 namespace Downgrader.Import
 {
-    /// <summary>Package B -> 2020 project. Run after the model import (it needs the id map for levels, groups and worksets).
+    /// <summary>Package B -> 2021 project. Run after the model import (it needs the id map for levels, groups and worksets).
     /// Every item is isolated in a sub-transaction; schedules always keep their CSV snapshot as the safety net.</summary>
     public class DocsImporter
     {
@@ -97,7 +97,7 @@ namespace Downgrader.Import
             it.Reset();
             while (it.MoveNext()) have.Add(it.Key.Name);
 
-            using (var shared = new SharedParamHelper(_app, System.IO.Path.Combine(_p.Root, "shared_params_2020.txt")))
+            using (var shared = new SharedParamHelper(_app, System.IO.Path.Combine(_p.Root, "shared_params_2021.txt")))
             {
                 foreach (ProjParamRec pp in _d.ProjectParams)
                 {
@@ -106,7 +106,7 @@ namespace Downgrader.Import
                     string err = Item(() =>
                     {
                         ParameterType pt;
-                        if (!RevitHelpers.TryEnum(cur.Spec, out pt)) throw new InvalidOperationException("Parameter type " + cur.Spec + " unknown in 2020");
+                        if (!RevitHelpers.TryEnum(cur.Spec, out pt)) throw new InvalidOperationException("Parameter type " + cur.Spec + " unknown in 2021");
                         BuiltInParameterGroup grp;
                         if (!RevitHelpers.TryEnum(cur.Group, out grp)) grp = BuiltInParameterGroup.PG_DATA;
                         Guid g = cur.IsShared && cur.Guid != null ? new Guid(cur.Guid) : Guid.NewGuid();
@@ -307,7 +307,7 @@ namespace Downgrader.Import
                     _scheduleIds[cur.Key] = vs.Id;
                 });
                 if (err != null) _r.Add("docs", Tiers.Skipped, "Schedule", sr.Name, sr.Key, err + " (CSV snapshot kept in " + sr.SnapshotCsv + ")");
-                else if (skipped.Count > 0) _r.Add("docs", Tiers.NativeWithLoss, "Schedule", sr.Name, sr.Key, "Fields / filters not available in 2020: " + string.Join(", ", skipped) + " (see " + sr.SnapshotCsv + ")");
+                else if (skipped.Count > 0) _r.Add("docs", Tiers.NativeWithLoss, "Schedule", sr.Name, sr.Key, "Fields / filters not available in 2021: " + string.Join(", ", skipped) + " (see " + sr.SnapshotCsv + ")");
                 else _r.Add("docs", Tiers.Native, "Schedule", sr.Name, sr.Key, null);
             }
         }
