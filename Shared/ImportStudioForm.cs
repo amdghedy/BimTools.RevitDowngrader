@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Downgrader.Core.Schema;
 using Downgrader.Core.Storage;
 using Downgrader.Core.Util;
 
@@ -184,7 +185,7 @@ namespace Downgrader.RevitShared
             _o.LevelNames = _allLevels.Checked ? new List<string>() : _levels.CheckedItems.Cast<string>().ToList();
             _o.DryRun = _dry.Checked;
             _o.OpenReportWhenDone = _showReport.Checked;
-            _o.Save(_paths);   // the importer reads its options from the package
+            _o.Save(_paths);
             Result = new ImportStudioResult { PackageRoot = _paths.Root, Model = _doModel.Checked, Docs = _doDocs.Checked, Options = _o };
             DialogResult = DialogResult.OK;
         }
