@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Downgrader.Core.Schema;
 using Downgrader.Core.Storage;
 using Downgrader.Core.Util;
 
